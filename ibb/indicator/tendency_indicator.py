@@ -14,7 +14,10 @@ class TendencyIndicator(bt.Indicator):
     def __init__(self):
         super(TendencyIndicator, self).__init__()
         self.tendency = []
-        self.tendency_indicator_index = 0
+        self.index = 0
+
+    def tendency_indicator_index(self):
+        self.index = len(self.data) - 1
 
     def get_time(self, index):
         return self.data.num2date(self.data.datetime[index])
@@ -22,8 +25,12 @@ class TendencyIndicator(bt.Indicator):
     def append_tendency_point(self, index, type_of_point):
         price = self.data.high[index] if type_of_point == 'HH' else self.data.low[index]
         self.zigzag[index] = price
-        self.tendency.append({'time': self.get_time(index), 'price': price, 'type': type_of_point,
-                              'tendency_indicator_index': self.tendency_indicator_index})
+        if len(self.tendency) > 0 and self.tendency[-1]['tendency_indicator_index'] == (self.index + index):
+            self.tendency[-1] = {'time': self.get_time(index), 'price': price, 'type': type_of_point,
+                                 'tendency_indicator_index': self.index + index}
+        else:
+            self.tendency.append({'time': self.get_time(index), 'price': price, 'type': type_of_point,
+                                  'tendency_indicator_index': self.index + index})
 
     def first_point(self):
         if len(self.tendency) == 0:
@@ -39,24 +46,25 @@ class TendencyIndicator(bt.Indicator):
                     self.append_tendency_point(0, 'LL')
 
     def next(self):
+        self.tendency_indicator_index()
         if len(self.tendency) == 0:
             self.first_point()
-        delta_close = self.data.close[0] - self.data.close[-1]
-        local_maximum = max([self.data.high[-2], self.data.high[-1], self.data.high[0]])
-        local_minimum = min([self.data.low[-2], self.data.low[-1], self.data.low[0]])
-        type_min = self.tendency[-1]['type'] == 'LL'
-        type_max = self.tendency[-1]['type'] == 'HH'
-        if delta_close < 0 and type_min:
-            index = 0 if self.data.high[0] > self.data.high[-1] else -1
-            self.append_tendency_point(index, 'HH')
-        if delta_close > 0 and type_max:
-            index = 0 if self.data.low[0] < self.data.low[-1] else -1
-            self.append_tendency_point(index, 'LL')
-        if self.data.high[-1] == local_maximum and type_min:
-            self.append_tendency_point(-1, 'HH')
-        if self.data.low[-1] == local_minimum and type_max:
-            self.append_tendency_point(-1, 'LL')
-        self.tendency_indicator_index += 1
+        else:
+            delta_close = self.data.close[0] - self.data.close[-1]
+            local_maximum = max([self.data.high[-2], self.data.high[-1], self.data.high[0]])
+            local_minimum = min([self.data.low[-2], self.data.low[-1], self.data.low[0]])
+            type_min = self.tendency[-1]['type'] == 'LL'
+            type_max = self.tendency[-1]['type'] == 'HH'
+            if delta_close < 0 and type_min:
+                index = 0 if self.data.high[0] > self.data.high[-1] else -1
+                self.append_tendency_point(index, 'HH')
+            elif delta_close > 0 and type_max:
+                index = 0 if self.data.low[0] < self.data.low[-1] else -1
+                self.append_tendency_point(index, 'LL')
+            elif self.data.high[-1] == local_maximum and type_min:
+                self.append_tendency_point(-1, 'HH')
+            elif self.data.low[-1] == local_minimum and type_max:
+                self.append_tendency_point(-1, 'LL')
 
 
 if __name__ == '__main__':
