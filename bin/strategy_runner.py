@@ -1,5 +1,6 @@
-import backtrader as bt
 from datetime import datetime
+
+import backtrader as bt
 
 from backtrader.plot import Plot_OldSync
 
@@ -21,7 +22,7 @@ if __name__ == '__main__':
         timeframe=bt.TimeFrame.Minutes,
         compression=1,
         fromdate=datetime(2021, 1, 26, 0, 0),
-        todate=datetime(2021, 1, 26, 3, 0))
+        todate=datetime(2021, 1, 26, 4, 0))
     cerebro.adddata(data)
     cerebro.broker.setcash(100000)
     cerebro.addsizer(bt.sizers.FixedSize, stake=1000)
