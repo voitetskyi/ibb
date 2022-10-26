@@ -11,41 +11,41 @@ class TwoEffortsTest(TestCase):
     def test_should_detekt_simple_long_block(self):
         quotes = """
                  |...9
-           |   |
+           |   |    |
          |   |
         |
         """
         zones = run_two_efforts_strategy(quotes, {'tendency_long': True})
         self.assertEqual(1, len(zones))
 
-    def test_should_not_detekt_simple_long_block(self):
+    def test_should_detekt_two_simple_long_blocks(self):
         quotes = """
              |
            |   |   |
-         |       |   |
-        |              |
+         |       |   |    |
+        |              |    |
         """
         zones = run_two_efforts_strategy(quotes, {'tendency_long': True})
-        self.assertEqual(0, len(zones))
+        self.assertEqual(2, len(zones))
 
     def test_should_detekt_simple_short_block(self):
         quotes = """
         |
           |   |
-            |   |...1
+            |   |...1  |
                   |
         """
         zones = run_two_efforts_strategy(quotes, {'tendency_long': False})
         self.assertEqual(1, len(zones))
 
-    def test_should_not_detekt_simple_short_block(self):
+    def test_should_detekt_two_simple_short_blocks(self):
         quotes = """
-        |           |
-          |   |   |
+        |           |   |
+          |   |   |   |
             |   |
         """
         zones = run_two_efforts_strategy(quotes, {'tendency_long': False})
-        self.assertEqual(0, len(zones))
+        self.assertEqual(2, len(zones))
 
 
 def run_two_efforts_strategy(quotes, params):
@@ -58,4 +58,4 @@ def run_two_efforts_strategy(quotes, params):
     cerebro.adddata(data)
     cerebro.addstrategy(BasicStrategy, params)
     stat = cerebro.run()
-    return stat[0].cerebro.runningstrats[0].two_efforts.zones
+    return stat[0].cerebro.runningstrats[0].two_efforts.blocks
