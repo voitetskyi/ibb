@@ -58,4 +58,4 @@ def run_two_efforts_strategy(quotes, params):
     cerebro.adddata(data)
     cerebro.addstrategy(BasicStrategy, params)
     stat = cerebro.run()
-    return stat[0].cerebro.runningstrats[0].two_efforts.blocks
+    return stat[0].cerebro.runningstrats[0].detekt_blocks.blocks
